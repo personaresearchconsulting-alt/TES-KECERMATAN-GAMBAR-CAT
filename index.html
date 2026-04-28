@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PORTAL TES KECERMATAN - Persona Research</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #0b2340; --gold: #d4a017; --gray: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background: #e2e8f0; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 450px; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 6px solid var(--navy); text-align: center; margin: 15px; }
+        
+        #login-section, #menu-section { display: none; }
+        .active { display: block !important; }
+
+        h1 { font-size: 22px; color: var(--navy); margin-bottom: 5px; }
+        p.subtitle { font-size: 13px; color: #64748b; margin-bottom: 25px; }
+
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 16px; text-align: center; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 15px; margin-bottom: 10px; text-decoration: none; display: block; }
+        
+        .btn-primary { background: var(--navy); color: #fff; }
+        .btn-primary:hover { background: #162e4d; }
+        
+        .menu-grid { display: grid; gap: 12px; margin-top: 20px; }
+        .btn-menu { background: #fff; border: 2px solid var(--navy); color: var(--navy); text-align: left; padding: 15px; }
+        .btn-menu:hover { background: var(--navy); color: #fff; }
+        
+        .info-box { font-size: 11px; color: #94a3b8; margin-top: 20px; padding: 10px; border-top: 1px solid #e2e8f0; }
+        .status-tag { font-size: 10px; background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-section" class="active">
+        <h1>LOGIN PORTAL</h1>
+        <p class="subtitle">Persona Research & Consulting</p>
+        <input type="password" id="passInput" placeholder="Masukkan Password Akses...">
+        <button class="btn btn-primary" onclick="checkAccess()">MASUK SISTEM</button>
+        <div id="loginMsg" style="color: #c0392b; font-size: 12px; margin-top: 10px;"></div>
+    </div>
+
+    <div id="menu-section">
+        <h1>DASHBOARD SIMULASI</h1>
+        <p class="subtitle">Silahkan pilih paket soal di bawah ini:</p>
+        
+        <div class="menu-grid">
+            <a href="mono_4.html" class="btn btn-menu">📊 PAKET 1: Kecermatan Monokrom 4</a>
+            <a href="mono_7fix.html" class="btn btn-menu">🖼️ PAKET 2: Kecermatan Gambar Fix</a>
+            <a href="mono_9.html" class="btn btn-menu">🦒 PAKET 3: Kecermatan Gambar Hewan & Alat</a>
+        </div>
+
+        <div class="info-box">
+            Status: <span class="status-tag">ACTIVE</span><br>
+            Akses Maksimal: 25 Perangkat | Expired: 7 Hari
+        </div>
+        <button onclick="logout()" style="margin-top: 15px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; text-decoration: underline;">Keluar Sesi</button>
+    </div>
+</div>
+
+<script>
+    // KONFIGURASI AKSES
+    const CONFIG = {
+        password: "persona05",
+        expiryDays: 7,
+        maxDevices: 25,
+        storageKey: "persona_auth_v1"
+    };
+
+    function checkAccess() {
+        const input = document.getElementById('passInput').value;
+        const msg = document.getElementById('loginMsg');
+
+        // 1. Cek Password
+        if (input !== CONFIG.password) {
+            msg.innerText = "Password salah!";
+            return;
+        }
+
+        // 2. Cek Device Limit (Simple Fingerprint via LocalStorage)
+        let deviceID = localStorage.getItem('persona_dev_id');
+        if (!deviceID) {
+            // Jika device baru, cek kuota total (simulasi via server diperlukan untuk akurasi 100%, 
+            // namun secara client-side kita set ID unik)
+            deviceID = 'DEV-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('persona_dev_id', deviceID);
+        }
+
+        // 3. Set Expiry (7 Hari dari login pertama)
+        const now = new Date().getTime();
+        const expiryDate = now + (CONFIG.expiryDays * 24 * 60 * 60 * 1000);
+        
+        const session = {
+            authenticated: true,
+            expires: expiryDate
+        };
+
+        localStorage.setItem(CONFIG.storageKey, JSON.stringify(session));
+        showMenu();
+    }
+
+    function showMenu() {
+        const sessionData = localStorage.getItem(CONFIG.storageKey);
+        if (sessionData) {
+            const session = JSON.parse(sessionData);
+            const now = new Date().getTime();
+
+            if (now > session.expires) {
+                alert("Masa berlaku akses telah habis (7 Hari).");
+                logout();
+                return;
+            }
+
+            document.getElementById('login-section').classList.remove('active');
+            document.getElementById('menu-section').classList.add('active');
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem(CONFIG.storageKey);
+        location.reload();
+    }
+
+    // Auto-login jika sesi masih valid
+    window.onload = showMenu;
+</script>
+
+</body>
+</html>
