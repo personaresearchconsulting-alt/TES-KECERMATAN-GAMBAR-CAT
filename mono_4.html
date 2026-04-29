@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-    <title>TES KECERMATAN GAMBAR - Persona Research & Consulting</title>
+    <title>TES KECERMATAN EKSPRESI - Persona Research & Consulting</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -12,7 +12,6 @@
         body { -webkit-user-select: none; user-select: none; margin:0; font-family:'Inter',sans-serif; background:#e2e8f0; display:flex; justify-content:center; min-height:100vh; color:#071130; }
         .wrap{width:100%; max-width:980px; background:#fff; border-top:6px solid var(--navy); border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.1); margin:20px; padding:30px; display: flex; flex-direction: column; min-height: 92vh;}
         
-        /* FILTER KHUSUS: MENJAGA DETAIL TAJAM & HITAM PEKAT */
         .symbol-black { 
             filter: url(#sharpBlack) brightness(1.2);
             -webkit-filter: url(#sharpBlack) brightness(1.2);
@@ -47,11 +46,16 @@
         .summary-cards{display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin:20px 0;}
         .card-skor{background:#f8fafc; padding:15px; border-radius:10px; text-align:center; border:1px solid #e2e8f0;}
         .card-skor b{display:block; font-size:11px; color:#64748b; margin-bottom:5px; text-transform: uppercase;}
-        .val-skor{font-size:28px; font-weight:900; color:var(--navy);}
+        .val-skor{font-size:28px; font-weight:900; color:var(--navy); line-height: 1;}
         .card-akhir{grid-column: span 2; background:var(--navy) !important; color:#fff !important;}
+        .card-akhir .val-skor{color:var(--gold); font-size:42px;}
+        
         .table-res{width:100%; border-collapse:collapse; font-size: 11px; margin-top: 15px;}
         .table-res th, .table-res td{border:1px solid #cbd5e1; padding:8px; text-align:center;}
         .table-res th{background:var(--navy); color:#fff;}
+        .kat-badge{display:inline-block; padding:3px 8px; border-radius:15px; font-size:9px; font-weight:bold; margin-top:5px; text-transform:uppercase;}
+        .bg-sukses{background:#dcfce7; color:#166534;}
+        .bg-bahaya{background:#fee2e2; color:#991b1b;}
     </style>
 </head>
 <body>
@@ -74,7 +78,7 @@
     </div>
 
     <div id="prepOverlay">
-        <div style="font-size:18px; margin-bottom:10px; color: #64748b;">FOKUS PADA DETAIL WAJAH...</div>
+        <div style="font-size:18px; margin-bottom:10px; color: #64748b;">FOKUS PADA DETAIL KARAKTER...</div>
         <div id="countdownText">3</div>
     </div>
 
@@ -93,27 +97,38 @@
     </div>
 
     <div id="resultArea">
-        <h2 style="text-align: center; font-size: 18px;">LAPORAN HASIL AKHIR</h2>
-        <p id="resName" style="text-align:center; font-weight:900; font-size:22px; color:var(--navy); margin-bottom:15px; text-transform: uppercase; border-bottom: 2px solid var(--navy);"></p>
+        <h2 style="text-align: center; font-size: 18px; margin-bottom: 5px;">LAPORAN HASIL AKHIR</h2>
+        <p id="resName" style="text-align:center; font-weight:900; font-size:22px; color:var(--navy); margin:0 0 15px 0; border-bottom: 2px solid var(--navy); padding-bottom:10px; text-transform: uppercase;"></p>
+        
         <div id="summaryBox" class="summary-cards"></div>
+
+        <div style="background:#f1f5f9; padding:15px; border-radius:10px; border:1px solid #cbd5e1; margin-bottom:15px;">
+            <b style="color:var(--navy); font-size:13px;">ANALISA HASIL / INTERPRETASI:</b>
+            <div id="kesimpulanNarasi" style="margin-top:8px; line-height:1.5; font-size:12px; color:#334155;"></div>
+        </div>
+
         <table class="table-res">
             <thead><tr><th>Kolom</th><th>Terjawab</th><th>Benar</th><th>Salah</th><th>+/-</th></tr></thead>
             <tbody id="tbodyHasil"></tbody>
         </table>
-        <div style="margin-top:20px; height: 200px;"><canvas id="chartPauli"></canvas></div>
+        <div style="margin-top:20px; height: 200px; border:1px solid #e2e8f0; padding:10px; border-radius:8px;"><canvas id="chartPauli"></canvas></div>
         <button id="btnDownload" style="background:#27ae60; color:#fff; border:none; padding:16px; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:20px; width:100%;" onclick="downloadFullPDF()">📥 DOWNLOAD HASIL (PDF)</button>
     </div>
 </div>
 
 <script>
-    // BANK SOAL: EKSPRESI EMOSI TAJAM
-    const MASTER_BANK = [
-        ["😀", "😱", "😎", "😴", "🤡"], ["😍", "😂", "😡", "🤢", "🤔"],
-        ["😇", "🤠", "🥳", "🤓", "🧐"], ["😈", "👻", "💀", "👽", "🤖"],
-        ["🤬", "🤯", "🤫", "🤥", "🤮"], ["🤡", "💀", "😱", "😎", "🤠"],
-        ["👽", "👻", "🤖", "😈", "🧐"], ["😂", "😡", "😴", "😍", "🤢"],
-        ["🥳", "😇", "🤓", "🤔", "😀"], ["🤯", "🤬", "🤮", "🤫", "🤥"]
-    ];
+        const MASTER_BANK = [
+    ["🏹", "🛡️", "⚔️", "🔱", "💎"], // Set 1: Peralatan Ksatria & Permata
+    ["🌋", "🌊", "🌪️", "☀️", "❄️"], // Set 2: Fenomena Alam (Kontras Bentuk)
+    ["🚲", "🚀", "⛵", "🚜", "🚁"], // Set 3: Transportasi (Siluet Berbeda)
+    ["🍄", "🌵", "🌻", "🌳", "🍁"], // Set 4: Flora (Detail Kelopak/Batang)
+    ["⚽", "🏀", "🎾", "🎱", "🏐"], // Set 5: Olahraga (Variasi Tekstur Bulat)
+    ["🎹", "🎸", "🎻", "🎷", "🥁"], // Set 6: Instrumen Musik
+    ["🍔", "🍕", "🍣", "🍦", "🍩"], // Set 7: Kuliner (Bentuk Geometris Makanan)
+    ["💡", "🔋", "🔌", "🔦", "⚙️"], // Set 8: Komponen Teknik
+    ["🦜", "🐠", "🦋", "🦎", "🐞"], // Set 9: Makhluk Hidup Warna-Warni
+    ["🏠", "🗼", "🎡", "🎢", "⛲"]  // Set 10: Ikon Rekreasi & Bangunan
+];
 
     let currentIdx = 0, timerLeft = 60, interval = null, results = [], pName = "", activeChars = [];
 
@@ -171,10 +186,8 @@
         const missingIdx = Math.floor(Math.random() * 5);
         const correctLabel = String.fromCharCode(65 + missingIdx);
         const display = activeChars.filter((_, i) => i !== missingIdx).sort(() => Math.random() - 0.5);
-        
         const soalCont = document.getElementById('soalCont');
         soalCont.innerHTML = display.map(s => `<span class="symbol-black">${s}</span>`).join('');
-        
         const cont = document.getElementById('pilihan');
         cont.innerHTML = '';
         ['A','B','C','D','E'].forEach(l => {
@@ -201,14 +214,21 @@
         const minK = Math.min(...terjawab);
         const maxK = Math.max(...terjawab);
         const range = maxK - minK;
-        const nilaiFix = ((totalB / 500) * 40).toFixed(2);
+        const skorTotal = ((totalB / 500) * 100).toFixed(2);
+        const nilaiFix = (skorTotal * 0.4).toFixed(2);
 
         document.getElementById('summaryBox').innerHTML = `
-            <div class="card-skor"><b>KECEPATAN (MIN)</b><div class="val-skor">${minK}</div></div>
-            <div class="card-skor"><b>KETELITIAN (SALAH)</b><div class="val-skor">${totalS}</div></div>
-            <div class="card-skor"><b>KESTABILAN (RANGE)</b><div class="val-skor">${range}</div></div>
-            <div class="card-akhir card-skor"><b>NILAI AKHIR</b><div class="val-skor" style="color:var(--gold); font-size:40px;">${nilaiFix}</div></div>
+            <div class="card-skor"><b>KECEPATAN (MIN)</b><div class="val-skor">${minK}</div><span class="kat-badge ${minK>=20?'bg-sukses':'bg-bahaya'}">${minK>=20?'BAIK':'KURANG'}</span></div>
+            <div class="card-skor"><b>KETELITIAN (SALAH)</b><div class="val-skor">${totalS}</div><span class="kat-badge ${totalS<=5?'bg-sukses':'bg-bahaya'}">${totalS<=5?'TELITI':'REDAH'}</span></div>
+            <div class="card-skor"><b>KESTABILAN (RANGE)</b><div class="val-skor">${range}</div><span class="kat-badge ${range<=5?'bg-sukses':'bg-bahaya'}">${range<=5?'STABIL':'LABIL'}</span></div>
+            <div class="card-skor"><b>SKOR TOTAL</b><div class="val-skor">${skorTotal}</div></div>
+            <div class="card-akhir card-skor"><b>NILAI AKHIR (X0.4)</b><div class="val-skor">${nilaiFix}</div></div>
         `;
+
+        let narasi = `Berdasarkan hasil simulasi, saudara ${pName} memiliki kecepatan kerja minimal ${minK} soal/menit. `;
+        narasi += totalS <= 5 ? "Tingkat ketelitian Anda sangat baik (High Precision). " : "Anda perlu melatih ketelitian karena ditemukan kesalahan di atas ambang batas. ";
+        narasi += range <= 5 ? "Grafik menunjukkan stabilitas emosi dan daya tahan stres yang sangat baik." : "Grafik fluktuatif menunjukkan adanya penurunan konsentrasi pada periode tertentu.";
+        document.getElementById('kesimpulanNarasi').textContent = narasi;
 
         let h = '';
         results.forEach((r, i) => { 
@@ -230,10 +250,13 @@
     async function downloadFullPDF() {
         const btn = document.getElementById('btnDownload');
         btn.style.display = 'none';
-        const canvas = await html2canvas(document.getElementById('captureArea'), { scale: 2 });
+        const element = document.getElementById('captureArea');
+        const canvas = await html2canvas(element, { scale: 2 });
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 210, (canvas.height * 210) / canvas.width);
+        const w = pdf.internal.pageSize.getWidth();
+        const h = (canvas.height * w) / canvas.width;
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, w, h);
         pdf.save(`Hasil_Kecermatan_${pName}.pdf`);
         btn.style.display = 'block';
     }
